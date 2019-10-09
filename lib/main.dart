@@ -1,5 +1,9 @@
+import 'package:day_5_starter/quiz_brain.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+import 'quiz_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() {
   runApp(Quizlr());
@@ -27,6 +31,59 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+ void alertbox(context){
+   Alert(
+     context: context,
+   //  type: AlertType.error,
+     title: "QUIZ COMPLETED",
+     desc: "you have reached and of the quiz and your score is $count/13",
+     buttons: [
+       DialogButton(
+         child: Text(
+           "Restart",
+           style: TextStyle(color: Colors.white, fontSize: 20),
+         ),
+          onPressed: () {
+            scoreKeeper = [];
+            brain.reset();
+            count =0;
+            Navigator.pop(context);
+        setState(() {});
+   },
+         width: 120,
+       )
+     ],
+   ).show();
+ }
+
+ int count =0;
+  List<Icon> scoreKeeper = [];
+
+  QuizBrain brain = QuizBrain();
+  void checkAnswer(bool userAnswer) {
+    if (brain.currentQuestion == brain.question.length - 1) {
+      alertbox(context);
+    } else {
+      setState(() {
+        if (brain.checkAnswer(userAnswer)) {
+          count++;
+          scoreKeeper.add(Icon(
+            Icons.check,
+            color: Colors.green,
+          )
+          );
+        } else {
+          scoreKeeper.add(Icon(
+            Icons.close,
+            color: Colors.red,
+          ));
+        }
+        brain.nextques();
+      });
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -39,7 +96,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                'This is where the question text will go',
+                brain.getcurrques().questiontext,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 24.0,
@@ -53,17 +110,18 @@ class _QuizPageState extends State<QuizPage> {
           child: Padding(
             padding: EdgeInsets.all(10.0),
             child: FlatButton(
-              textColor: Colors.white,
-              color: Colors.green,
-              child: Text(
-                'True',
-                style: TextStyle(
-                  fontSize: 20.0,
-                  color: Colors.white,
+                textColor: Colors.white,
+                color: Colors.green,
+                child: Text(
+                  'True',
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              onPressed: () {},
-            ),
+                onPressed: () {
+                  checkAnswer(true);
+                }),
           ),
         ),
         Expanded(
@@ -79,16 +137,19 @@ class _QuizPageState extends State<QuizPage> {
                   color: Colors.white,
                 ),
               ),
-              onPressed: () {},
+              onPressed: () {
+                checkAnswer(false);
+              },
             ),
           ),
         ),
-        // TODO a row here to keep the scores
+        Row(
+          children: scoreKeeper,
+        )
       ],
     );
   }
 }
-
 
 // Sample Questions and Answers
 // Q.1 Amartya Sen was awarded the Nobel prize for his contribution to Welfare Economics., true
